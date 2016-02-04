@@ -1,0 +1,47 @@
+<!DOCType html>
+<html>
+<head>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/dcs.js"></script>
+</head>
+<body>
+	<input type="button" value="Scan" onclick="OnScan();"/>
+	<img id="showImg" />
+	<script>
+	var scannerId,scannerName;
+	
+	$.ready(function(){
+
+		// list scans
+		Dynamsoft.DCS.List(function(scanList){
+			if(scanList.length>0){
+				scannerId = scanList[0].Id;
+				scannerName = scanList[0].Name;
+			}
+		});	
+	});
+	
+	// scan a image
+	function OnScan(){
+		if(scannerId){
+			Dynamsoft.DCS.Scan(scannerId, ScanCallback);
+		}else{
+			// error
+		}
+	}
+	
+	function ScanCallback(jobId){
+		setTimeout(function(){
+			Dynamsoft.DCS.QueryJob(jobId, function(jobResult){
+				if(jobResult.JobState == 0){
+					// scan complete, show the image
+					document.getElementById('showImg').src=jobResult.ImageUrl;
+				} else {
+					ScanCallback(jobId);
+				}
+			});
+		}, 1000);
+	}
+
+	</script>
+</body>
